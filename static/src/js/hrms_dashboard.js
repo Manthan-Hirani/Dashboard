@@ -511,6 +511,23 @@ var HrDashboard = AbstractAction.extend({
         var elem = this.$('.emp_graph');
         var colors = ['#F4B400', '#DB4437', '#AB47BC', '#0F9D58', '#4285F4'];
         var color = d3.scale.ordinal().range(colors);
+        var domain_data = (elem)=>{
+            if(elem==0){
+                return [['wage', '<', '25000']]
+            }
+            else if(elem==1){
+                return [['wage', '>=', '25000'],['wage', '<', '50000']]
+            }
+            else if(elem==2){
+                return [['wage', '>=', '50000'],['wage', '<', '75000']]
+            }
+            else if(elem==3){
+                return [['wage', '>=', '75000'],['wage', '<', '100000']]
+            }
+            else if(elem==4){
+                return [['wage', '>=', '100000']]
+            }
+        }
         rpc.query({
             model: "hr.contract",
             method: "salary_range",
@@ -526,6 +543,27 @@ var HrDashboard = AbstractAction.extend({
                 })
                 .attr("d", function (d) {
                     return arc(d);
+                })
+                .attr("class", function (d, i) {
+                    return "arc-" + i; // Assign a unique class to each arc
+                })
+                .on("click", function (d, i) {
+//                    var self = this;
+                    var options = {
+                        on_reverse_breadcrumb: this.on_reverse_breadcrumb,
+                    };
+                    self.do_action({
+                        name: _t("Employees' Contract"),
+                        type: 'ir.actions.act_window',
+                        res_model: 'hr.contract',
+                        view_mode: 'tree,kanban',
+                        views: [[false, 'list'], [false, 'kanban']],
+                        domain: domain_data(i),
+                        context: {},
+                        target: 'current'
+                    }, options)
+                    console.log("Clicked on arc " + i);
+                    console.log(d.data)
                 });
 
             arcs.append("text")
@@ -567,24 +605,6 @@ var HrDashboard = AbstractAction.extend({
         var elem = this.$('.exp_salary_graph');
         var colors = ['#F4B400', '#DB4437', '#AB47BC', '#0F9D58', '#4285F4'];
         var color = d3.scale.ordinal().range(colors);
-        var context_data = (elem)=>{
-        console.log("trigger")
-            if(elem==0){
-                return [['wage', '<', '25000']]
-            }
-            else if(elem==1){
-                return [['wage', '>=', '25000'],['wage', '<', '50000']]
-            }
-            else if(elem==2){
-                return [['wage', '>=', '50000'],['wage', '<', '75000']]
-            }
-            else if(elem==3){
-                return [['wage', '>=', '75000'],['wage', '<', '100000']]
-            }
-            else if(elem==4){
-                return [['wage', '>=', '100000']]
-            }
-        }
         rpc.query({
             model: "hr.employee",
             method: "experience_salary_graph",
@@ -594,6 +614,20 @@ var HrDashboard = AbstractAction.extend({
             var pie = d3.layout.pie().value(function (d) { return d.value; });
             var arc = d3.svg.arc().outerRadius(r).innerRadius(r/2);
             var arcs = vis.selectAll("g.slice").data(pie).enter().append("svg:g").attr("class", "slice");
+
+            var tooltip = d3.select('#chart')                               // NEW
+                .append('div')                                                // NEW
+                .attr('class', 'tooltip');                                    // NEW
+
+            tooltip.append('div')                                           // NEW
+                .attr('class', 'label');                                      // NEW
+
+            tooltip.append('div')                                           // NEW
+                .attr('class', 'count');                                      // NEW
+
+            tooltip.append('div')                                           // NEW
+                .attr('class', 'percent');
+
             arcs.append("svg:path")
                 .attr("fill", function (d, i) {
                     return color(i);
@@ -604,49 +638,25 @@ var HrDashboard = AbstractAction.extend({
                 .attr("class", function (d, i) {
                     return "arc-" + i; // Assign a unique class to each arc
                 })
-                .attr("title", function (d, i){
-                    return d.data.value
-                })
-                .on("click", function (d, i) {
-//                    var self = this;
-                    var options = {
-                        on_reverse_breadcrumb: this.on_reverse_breadcrumb,
-                    };
-                    self.do_action({
-                        name: _t("Employees' Contract"),
-                        type: 'ir.actions.act_window',
-                        res_model: 'hr.contract',
-                        view_mode: 'tree,kanban',
-                        views: [[false, 'list'], [false, 'kanban']],
-                        domain: context_data(i),
-                        target: 'current'
-                    }, options)
-                    console.log("Clicked on arc " + i);
-                    console.log(d.data)
-                })
                 .on("mouseover", function (d, i) {
-                    console.log("hover",d.data.value)
-                    document.getElementsByClassName("exp_salary_graph").createElement("span").innerHTML = d.data.value;
+                    console.log("hover",d.data.value);
+                    tooltip.select('.label').html(d.data.label);
+                    tooltip.select('.count').html(d.data.count);
+                    tooltip.style('display', 'block');
+
+
+
+//                    var span = document.createElement("span");
+//                    span.innerHTML = d.data.value;
+//                    document.getElementsByClassName("exp_salary_graph")[0].appendChild(span);
+
+//                    document.getElementsByClassName("exp_salary_graph")[0].innerHTML = '<span>' + d.data.value + '</span>';
+//                    document.getElementsByClassName("exp_salary_graph").createElement("span").innerHTML = d.data.value;
+                })
+                .on('mouseout', function() {                              // NEW
+                    tooltip.style('display', 'none');                           // NEW
                 });
-                // Target the first arc (index 0)
-//                var firstArc = d3.select(".arc-0");
-//                var secondArc = d3.select(".arc-1");
-//                var thirdArc = d3.select(".arc-2");
-//                var forthArc = d3.select(".arc-3");
-//                var fifthArc = d3.select(".arc-4");
-////                console.log(firstArc[0])
-//                firstArc.on("click",function () {
-//                    console.log("RUn")
-//                });
 
-
-
-//            arcs.append("text")
-//                .attr("transform", function(d) {
-//                  return "translate(" + arc.centroid(d) + ")"
-//                })
-//                .attr("text-anchor", "end")
-//                .text(function(d) {return d.value})
 
 
             var legend = d3.select(elem[0]).append("table").attr('class', 'legend');

@@ -80,6 +80,33 @@ class HrContract(models.Model):
     #     return avg_salary
 
 
+class AccountInvoice(models.Model):
+    _inherit = "account.move"
+
+    @api.model
+    def invoices(self):
+        data = []
+        for rec in self.env['account.move'].search([('move_type', '=', 'in_invoice')]):
+            data.append({'label': rec.partner_id.name, 'value': abs(rec.amount_residual_signed)})
+
+        print(data)
+        return data
+
+    @api.model
+    def bills(self):
+        data = []
+        for rec in self.env['account.move'].search([('move_type', '=', 'out_invoice')]):
+            data.append({'label': rec.partner_id.name, 'value': abs(rec.amount_residual_signed)})
+
+        print(data)
+        return data
+
+    @api.model
+    def bills(self):
+
+        pass
+
+
 class Employee(models.Model):
     _inherit = 'hr.employee'
 
@@ -269,6 +296,19 @@ class Employee(models.Model):
 
     @api.model
     def experience_salary_graph(self):
+        temp_data1 = []
+        for rec in self.env['account.move'].search([('move_type', '=', 'in_invoice')]):
+            if rec.payment_state != 'paid':
+                temp_data1.append({'label': rec.partner_id.name, 'value': abs(rec.amount_residual_signed)})
+
+        print(temp_data1)
+
+        temp_data = []
+        for rec in self.env['account.move'].search([('move_type', '=', 'out_invoice')]):
+            if rec.payment_state != 'paid':
+                temp_data.append({'label': rec.partner_id.name, 'value': abs(rec.amount_residual_signed)})
+
+        print(temp_data)
         data = []
         salary_dict = {
             'Below 2 years': {'count': 0, 'sum': 0},

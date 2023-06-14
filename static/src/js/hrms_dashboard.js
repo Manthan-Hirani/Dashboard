@@ -181,6 +181,8 @@ var HrDashboard = AbstractAction.extend({
         if (this.login_employee) {
             self.render_salary_groups();
             self.render_exp_salary_groups();
+            self.render_invoices();
+            self.render_bills();
             self.render_leave_graph();
             self.update_join_resign_trends();
             self.update_monthly_attrition();
@@ -511,23 +513,6 @@ var HrDashboard = AbstractAction.extend({
         var elem = this.$('.emp_graph');
         var colors = ['#F4B400', '#DB4437', '#AB47BC', '#0F9D58', '#4285F4'];
         var color = d3.scale.ordinal().range(colors);
-        var domain_data = (elem)=>{
-            if(elem==0){
-                return [['wage', '<', '25000']]
-            }
-            else if(elem==1){
-                return [['wage', '>=', '25000'],['wage', '<', '50000']]
-            }
-            else if(elem==2){
-                return [['wage', '>=', '50000'],['wage', '<', '75000']]
-            }
-            else if(elem==3){
-                return [['wage', '>=', '75000'],['wage', '<', '100000']]
-            }
-            else if(elem==4){
-                return [['wage', '>=', '100000']]
-            }
-        }
         rpc.query({
             model: "hr.contract",
             method: "salary_range",
@@ -548,22 +533,38 @@ var HrDashboard = AbstractAction.extend({
                     return "arc-" + i; // Assign a unique class to each arc
                 })
                 .on("click", function (d, i) {
-//                    var self = this;
-                    var options = {
-                        on_reverse_breadcrumb: this.on_reverse_breadcrumb,
+                    var domain = [];
+                    console.log(i,d.data.label)
+
+                    if (i === 0) {
+                        domain = [['wage', '<', 25000]];
+                    } else if (i === 1) {
+                        domain = [['wage', '>=', 25000], ['wage', '<', 50000]];
+                    } else if (i === 2) {
+                        domain = [['wage', '>=', 50000], ['wage', '<', 75000]];
+                    } else if (i === 3) {
+                        domain = [['wage', '>=', 75000], ['wage', '<', 100000]];
+                    } else if (i === 4) {
+                        domain = [['wage', '>=', 100000]];
+                    }
+
+                    var context = {
+                        search_default_domain: domain,  // Set the domain in the context for the action
                     };
+
                     self.do_action({
-                        name: _t("Employees' Contract"),
+                        name: _t("Employee Salary"),
                         type: 'ir.actions.act_window',
                         res_model: 'hr.contract',
-                        view_mode: 'tree,kanban',
-                        views: [[false, 'list'], [false, 'kanban']],
-                        domain: domain_data(i),
-                        context: {},
-                        target: 'current'
-                    }, options)
-                    console.log("Clicked on arc " + i);
-                    console.log(d.data)
+                        view_mode: 'tree,kanban,form',
+                        views: [[false, 'list'], [false, 'kanban'], [false, 'form']],
+                        context: context,
+                        target: 'current',
+                        domain: domain,  // Pass the domain as a separate property in the action
+                        search_view_id: 542,  // Replace with the ID of your desired search view
+                    });
+
+                    // Rest of the code...
                 });
 
             arcs.append("text")
@@ -590,7 +591,6 @@ var HrDashboard = AbstractAction.extend({
             // create the third column for each segment.
             tr.append("td").attr("class", 'legendFreq')
                 .text(function (d) { return d.value; });
-
 
 
         });
@@ -675,6 +675,160 @@ var HrDashboard = AbstractAction.extend({
             // create the third column for each segment.
             tr.append("td").attr("class", 'legendFreq')
                 .text(function (d) { return d.value; });
+
+
+        });
+
+    },
+
+    render_invoices: function () {
+        var self = this;
+        var w = 200;
+        var h = 200;
+        var r = h / 2;
+        var elem = this.$('.account_invoices');
+        var colors = ['#F4B400', '#DB4437', '#AB47BC', '#0F9D58', '#4285F4'];
+        var color = d3.scale.ordinal().range(colors);
+        rpc.query({
+            model: "account.move",
+            method: "invoices",
+        }).then(function (data) {
+//            console.log(data)
+            if (data.length > 0) {
+                var segColor = {};
+                var vis = d3.select(elem[0]).append("svg:svg").data([data]).attr("width", w).attr("height", h).append("svg:g").attr("transform", "translate(" + r + "," + r + ")");
+                var pie = d3.layout.pie().value(function (d) { return d.value; });
+                var arc = d3.svg.arc().outerRadius(r).innerRadius(r/2);
+                var arcs = vis.selectAll("g.slice").data(pie).enter().append("svg:g").attr("class", "slice");
+
+                arcs.append("svg:path")
+                    .attr("fill", function (d, i) {
+                        return color(i);
+                    })
+                    .attr("d", function (d) {
+                        return arc(d);
+                    })
+                    .attr("class", function (d, i) {
+                        return "arc-" + i; // Assign a unique class to each arc
+                    })
+                    .on("click", function (d, i) {
+                        var domain = [];
+//                        console.log(i,d.data.label)
+                        domain = [['invoice_partner_display_name', '=', d.data.label],['move_type', '=', 'out_invoice'],['amount_residual_signed', '!=', '0']];
+
+                        var context = {
+                            search_default_domain: domain,
+                        };
+
+                        self.do_action({
+                            name: _t("Invoices"),
+                            type: 'ir.actions.act_window',
+                            res_model: 'account.move',
+                            view_mode: 'tree,kanban,form',
+                            views: [[false, 'list'], [false, 'kanban'], [false, 'form']],
+                            context: context,
+                            target: 'current',
+                            domain: domain,
+                            search_view_id: data[1],  // Replace with the ID of your desired search view
+//                            console.log(search_view_id)
+                        });
+
+                        // Rest of the code...
+                    });
+                arcs.append("text")
+                    .attr("transform", function(d) {
+                      return "translate(" + arc.centroid(d) + ")"
+                    })
+                    .attr("text-anchor", "end")
+                    .text(function(d) {return d.value})
+
+
+                var legend = d3.select(elem[0]).append("table").attr('class', 'legend');
+
+                // create one row per segment.
+                var tr = legend.append("tbody").selectAll("tr").data(data).enter().append("tr");
+
+                // create the first column for each segment.
+                tr.append("td").append("svg").attr("width", '16').attr("height", '16').append("rect")
+                    .attr("width", '16').attr("height", '16')
+                    .attr("fill", function (d, i) { return color(i) });
+
+                // create the second column for each segment.
+                tr.append("td").text(function (d) { return d.label; });
+
+                // create the third column for each segment.
+                tr.append("td").attr("class", 'legendFreq')
+                    .text(function (d) { return d.value; });
+
+            }
+            else{
+                var span = document.querySelector(".empty_graph_data_invoice")
+                span.appendChild(document.createTextNode("No pending invoices"))
+            }
+
+        });
+
+    },
+
+    render_bills: function () {
+        var self = this;
+        var w = 200;
+        var h = 200;
+        var r = h / 2;
+        var elem = this.$('.account_bills');
+        var colors = ['#F4B400', '#DB4437', '#AB47BC', '#0F9D58', '#4285F4'];
+        var color = d3.scale.ordinal().range(colors);
+        rpc.query({
+            model: "account.move",
+            method: "bills",
+        }).then(function (data) {
+            if (data.length > 0){
+                var segColor = {};
+                var vis = d3.select(elem[0]).append("svg:svg").data([data]).attr("width", w).attr("height", h).append("svg:g").attr("transform", "translate(" + r + "," + r + ")");
+                var pie = d3.layout.pie().value(function (d) { return d.value; });
+                var arc = d3.svg.arc().outerRadius(r).innerRadius(r/2);
+                var arcs = vis.selectAll("g.slice").data(pie).enter().append("svg:g").attr("class", "slice");
+
+                arcs.append("svg:path")
+                    .attr("fill", function (d, i) {
+                        return color(i);
+                    })
+                    .attr("d", function (d) {
+                        return arc(d);
+                    })
+                    .attr("class", function (d, i) {
+                        return "arc-" + i; // Assign a unique class to each arc
+                    });
+                arcs.append("text")
+                    .attr("transform", function(d) {
+                      return "translate(" + arc.centroid(d) + ")"
+                    })
+                    .attr("text-anchor", "end")
+                    .text(function(d) {return d.value})
+
+
+                var legend = d3.select(elem[0]).append("table").attr('class', 'legend');
+
+                // create one row per segment.
+                var tr = legend.append("tbody").selectAll("tr").data(data).enter().append("tr");
+
+                // create the first column for each segment.
+                tr.append("td").append("svg").attr("width", '16').attr("height", '16').append("rect")
+                    .attr("width", '16').attr("height", '16')
+                    .attr("fill", function (d, i) { return color(i) });
+
+                // create the second column for each segment.
+                tr.append("td").text(function (d) { return d.label; });
+
+                // create the third column for each segment.
+                tr.append("td").attr("class", 'legendFreq')
+                    .text(function (d) { return d.value; });
+
+            }
+            else{
+                var span = document.querySelector(".empty_graph_data_bill")
+                span.appendChild(document.createTextNode("No pending bills"))
+            }
 
         });
 

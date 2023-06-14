@@ -3,6 +3,7 @@
 from collections import defaultdict
 from datetime import timedelta, datetime, date
 from dateutil.relativedelta import relativedelta
+from collections import Counter
 import pandas as pd
 from pytz import utc
 from odoo import models, fields, api, _
@@ -86,25 +87,35 @@ class AccountInvoice(models.Model):
     @api.model
     def invoices(self):
         data = []
-        for rec in self.env['account.move'].search([('move_type', '=', 'in_invoice')]):
-            data.append({'label': rec.partner_id.name, 'value': abs(rec.amount_residual_signed)})
+        vendor = []
+        for rec in self.env['account.move'].search([('move_type', '=', 'out_invoice'), ('amount_residual_signed', '!=', '0')]):
+            vendor.append(rec.partner_id.name)
+
+        counter = Counter(vendor)
+
+        search_id = int(self.env.ref('account.view_account_invoice_filter').sudo().id)
+        data = [{'label': key, 'value': value, 'search_id': search_id} for key, value in counter.items()]
 
         print(data)
+
         return data
 
     @api.model
     def bills(self):
         data = []
-        for rec in self.env['account.move'].search([('move_type', '=', 'out_invoice')]):
-            data.append({'label': rec.partner_id.name, 'value': abs(rec.amount_residual_signed)})
+        vendor = []
+        for rec in self.env['account.move'].search(
+                [('move_type', '=', 'in_invoice'), ('amount_residual_signed', '!=', '0')]):
+            vendor.append(rec.partner_id.name)
+
+        counter = Counter(vendor)
+
+        search_id = self.env.ref('account.view_account_invoice_filter').sudo().id
+        data = [{'label': key, 'value': value, 'search_id': search_id} for key, value in counter.items()]
 
         print(data)
+
         return data
-
-    @api.model
-    def bills(self):
-
-        pass
 
 
 class Employee(models.Model):
@@ -296,19 +307,6 @@ class Employee(models.Model):
 
     @api.model
     def experience_salary_graph(self):
-        temp_data1 = []
-        for rec in self.env['account.move'].search([('move_type', '=', 'in_invoice')]):
-            if rec.payment_state != 'paid':
-                temp_data1.append({'label': rec.partner_id.name, 'value': abs(rec.amount_residual_signed)})
-
-        print(temp_data1)
-
-        temp_data = []
-        for rec in self.env['account.move'].search([('move_type', '=', 'out_invoice')]):
-            if rec.payment_state != 'paid':
-                temp_data.append({'label': rec.partner_id.name, 'value': abs(rec.amount_residual_signed)})
-
-        print(temp_data)
         data = []
         salary_dict = {
             'Below 2 years': {'count': 0, 'sum': 0},

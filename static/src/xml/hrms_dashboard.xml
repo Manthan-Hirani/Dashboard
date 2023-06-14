@@ -348,7 +348,7 @@
                     <div class="graph_view mx-3">
                         <div class="text-color hr-chart-1">
                             <div class="oh-card-body pb-0 h-100">
-                                <p class="stat-head">Salary Range</p>
+                                <p class="stat-head">Employee Salary Range</p>
                             </div>
                             <div class="emp_graph"/>
                         </div>
@@ -358,9 +358,35 @@
                     <div class="graph_view mx-3">
                         <div class="text-color hr-chart-1">
                             <div class="oh-card-body pb-0 h-100">
-                                <p class="stat-head">Average salary based on Experience</p>
+                                <p class="stat-head">Employee Average salary based on Experience</p>
                             </div>
                             <div class="exp_salary_graph"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row main-section">
+                <div class="col-sm-12 col-lg-6 p-0">
+                    <div class="graph_view mx-3">
+                        <div class="text-color hr-chart-1">
+                            <div class="oh-card-body pb-0 h-100">
+                                <p class="stat-head">Pending Invoices</p>
+                            </div>
+                            <div class="account_invoices">
+                                <div class="empty_graph_data_invoice"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-lg-6 p-0">
+                    <div class="graph_view mx-3">
+                        <div class="text-color hr-chart-1">
+                            <div class="oh-card-body pb-0 h-100">
+                                <p class="stat-head">Pending Bills</p>
+                            </div>
+                            <div class="account_bills">
+                                <div class="empty_graph_data_bill"/>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -413,29 +439,19 @@
 <!--&lt;!&ndash;                    </div>&ndash;&gt;-->
 <!--                </div>-->
             </div>
-            <div class="row main-section m-2">
-<!--                <div class="col-sm-12 col-lg-12 monthly_leave_graph_view">-->
+
+<!--            <div class="row main-section m-2">-->
+<!--                <div class="col mx-3 hr_employee_payroll">-->
 <!--                    <div class="oh-card text-color">-->
 <!--                        <div class="oh-card-body pb-0">-->
-<!--                            <h4 class="mb-0"/>-->
-<!--                            <p class="stat-head" style="padding : 0px;">Monthly Leave Analysis</p>-->
+<!--                            <p class="stat-title">Payslip</p>-->
+<!--                            <h4 class="mb-0">-->
+<!--                                <p class="stat-count"><t t-esc="widget.login_employee.employee_payroll"/></p>-->
+<!--                            </h4>-->
 <!--                        </div>-->
-<!--                        <div class="leave_graph"/>-->
 <!--                    </div>-->
 <!--                </div>-->
-<!--                    <div class="row mt-5">-->
-                <div class="col hr_employee_payroll">
-                    <div class="oh-card text-color">
-                        <div class="oh-card-body pb-0">
-                            <p class="stat-title">Payslip</p>
-                            <h4 class="mb-0">
-                                <p class="stat-count"><t t-esc="widget.login_employee.employee_payroll"/></p>
-                            </h4>
-                        </div>
-                    </div>
-                </div>
-<!--                    </div>-->
-            </div>
+<!--            </div>-->
         </div>
     </t>
 

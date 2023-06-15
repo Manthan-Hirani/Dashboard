@@ -522,6 +522,35 @@ var HrDashboard = AbstractAction.extend({
             var pie = d3.layout.pie().value(function (d) { return d.value; });
             var arc = d3.svg.arc().outerRadius(r).innerRadius(r/2);
             var arcs = vis.selectAll("g.slice").data(pie).enter().append("svg:g").attr("class", "slice");
+
+            // Create the tooltip element
+            var tooltip = document.createElement("div");
+            tooltip.id = "tooltip";
+            tooltip.style.position = "absolute";
+            tooltip.style.pointerEvents = "none";
+            tooltip.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+            tooltip.style.color = "white";
+            tooltip.style.padding = "8px";
+            tooltip.style.fontSize = "12px";
+            tooltip.style.borderRadius = "4px";
+            tooltip.style.opacity = 0;
+            tooltip.style.textAlign = "center";
+
+            // Append the tooltip to the body element
+            document.body.appendChild(tooltip);
+
+            // Function to show/hide the tooltip
+            function showTooltip(d) {
+                tooltip.style.opacity = 1;
+                tooltip.style.left = (d3.event.pageX - tooltip.offsetWidth / 2) + "px";
+                tooltip.style.top = (d3.event.pageY - tooltip.offsetHeight / 2) + "px";
+                tooltip.innerHTML = d.data.label + "<br/>" + d.data.value;
+            }
+
+            function hideTooltip() {
+                tooltip.style.opacity = 0;
+            }
+
             arcs.append("svg:path")
                 .attr("fill", function (d, i) {
                     return color(i);
@@ -565,7 +594,9 @@ var HrDashboard = AbstractAction.extend({
                     });
 
                     // Rest of the code...
-                });
+                })
+                .on("mouseover", showTooltip)
+                .on("mouseout", hideTooltip);
 
             arcs.append("text")
                 .attr("transform", function(d) {
@@ -615,18 +646,33 @@ var HrDashboard = AbstractAction.extend({
             var arc = d3.svg.arc().outerRadius(r).innerRadius(r/2);
             var arcs = vis.selectAll("g.slice").data(pie).enter().append("svg:g").attr("class", "slice");
 
-            var tooltip = d3.select('#chart')                               // NEW
-                .append('div')                                                // NEW
-                .attr('class', 'tooltip');                                    // NEW
+            // Create the tooltip element
+            var tooltip = document.createElement("div");
+            tooltip.id = "tooltip";
+            tooltip.style.position = "absolute";
+            tooltip.style.pointerEvents = "none";
+            tooltip.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+            tooltip.style.color = "white";
+            tooltip.style.padding = "8px";
+            tooltip.style.fontSize = "12px";
+            tooltip.style.borderRadius = "4px";
+            tooltip.style.opacity = 0;
+            tooltip.style.textAlign = "center";
 
-            tooltip.append('div')                                           // NEW
-                .attr('class', 'label');                                      // NEW
+            // Append the tooltip to the body element
+            document.body.appendChild(tooltip);
 
-            tooltip.append('div')                                           // NEW
-                .attr('class', 'count');                                      // NEW
+            // Function to show/hide the tooltip
+            function showTooltip(d) {
+                tooltip.style.opacity = 1;
+                tooltip.style.left = (d3.event.pageX - tooltip.offsetWidth / 2) + "px";
+                tooltip.style.top = (d3.event.pageY - tooltip.offsetHeight / 2) + "px";
+                tooltip.innerHTML = d.data.label + "<br/>" + d.data.value;
+            }
 
-            tooltip.append('div')                                           // NEW
-                .attr('class', 'percent');
+            function hideTooltip() {
+                tooltip.style.opacity = 0;
+            }
 
             arcs.append("svg:path")
                 .attr("fill", function (d, i) {
@@ -638,24 +684,8 @@ var HrDashboard = AbstractAction.extend({
                 .attr("class", function (d, i) {
                     return "arc-" + i; // Assign a unique class to each arc
                 })
-                .on("mouseover", function (d, i) {
-                    console.log("hover",d.data.value);
-                    tooltip.select('.label').html(d.data.label);
-                    tooltip.select('.count').html(d.data.count);
-                    tooltip.style('display', 'block');
-
-
-
-//                    var span = document.createElement("span");
-//                    span.innerHTML = d.data.value;
-//                    document.getElementsByClassName("exp_salary_graph")[0].appendChild(span);
-
-//                    document.getElementsByClassName("exp_salary_graph")[0].innerHTML = '<span>' + d.data.value + '</span>';
-//                    document.getElementsByClassName("exp_salary_graph").createElement("span").innerHTML = d.data.value;
-                })
-                .on('mouseout', function() {                              // NEW
-                    tooltip.style('display', 'none');                           // NEW
-                });
+                .on("mouseover", showTooltip)
+                .on("mouseout", hideTooltip);
 
 
 
@@ -701,6 +731,35 @@ var HrDashboard = AbstractAction.extend({
                 var arc = d3.svg.arc().outerRadius(r).innerRadius(r/2);
                 var arcs = vis.selectAll("g.slice").data(pie).enter().append("svg:g").attr("class", "slice");
 
+                // Create the tooltip element
+                var tooltip = document.createElement("div");
+                tooltip.id = "tooltip";
+                tooltip.style.position = "absolute";
+                tooltip.style.pointerEvents = "none";
+                tooltip.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+                tooltip.style.color = "white";
+                tooltip.style.padding = "8px";
+                tooltip.style.fontSize = "12px";
+                tooltip.style.borderRadius = "4px";
+                tooltip.style.opacity = 0;
+                tooltip.style.textAlign = "center";
+
+                // Append the tooltip to the body element
+                document.body.appendChild(tooltip);
+
+                // Function to show/hide the tooltip
+                function showTooltip(d) {
+                    tooltip.style.opacity = 1;
+                    tooltip.style.left = (d3.event.pageX - tooltip.offsetWidth / 2) + "px";
+                    tooltip.style.top = (d3.event.pageY - tooltip.offsetHeight / 2) + "px";
+                    tooltip.innerHTML = d.data.label + "<br/>" + d.data.value;
+                }
+
+                function hideTooltip() {
+                    tooltip.style.opacity = 0;
+                }
+
+
                 arcs.append("svg:path")
                     .attr("fill", function (d, i) {
                         return color(i);
@@ -734,13 +793,16 @@ var HrDashboard = AbstractAction.extend({
                         });
 
                         // Rest of the code...
-                    });
+                    })
+                    .on("mouseover", showTooltip)
+                    .on("mouseout", hideTooltip);
+
                 arcs.append("text")
                     .attr("transform", function(d) {
                       return "translate(" + arc.centroid(d) + ")"
                     })
                     .attr("text-anchor", "end")
-                    .text(function(d) {return d.value})
+                    .text(function(d) {return d.data.txt})
 
 
                 var legend = d3.select(elem[0]).append("table").attr('class', 'legend');
@@ -789,6 +851,34 @@ var HrDashboard = AbstractAction.extend({
                 var arc = d3.svg.arc().outerRadius(r).innerRadius(r/2);
                 var arcs = vis.selectAll("g.slice").data(pie).enter().append("svg:g").attr("class", "slice");
 
+                // Create the tooltip element
+                var tooltip = document.createElement("div");
+                tooltip.id = "tooltip";
+                tooltip.style.position = "absolute";
+                tooltip.style.pointerEvents = "none";
+                tooltip.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+                tooltip.style.color = "white";
+                tooltip.style.padding = "8px";
+                tooltip.style.fontSize = "12px";
+                tooltip.style.borderRadius = "4px";
+                tooltip.style.opacity = 0;
+                tooltip.style.textAlign = "center";
+
+                // Append the tooltip to the body element
+                document.body.appendChild(tooltip);
+
+                // Function to show/hide the tooltip
+                function showTooltip(d) {
+                    tooltip.style.opacity = 1;
+                    tooltip.style.left = (d3.event.pageX - tooltip.offsetWidth / 2) + "px";
+                    tooltip.style.top = (d3.event.pageY - tooltip.offsetHeight / 2) + "px";
+                    tooltip.innerHTML = d.data.label + "<br/>" + d.data.value;
+                }
+
+                function hideTooltip() {
+                    tooltip.style.opacity = 0;
+                }
+
                 arcs.append("svg:path")
                     .attr("fill", function (d, i) {
                         return color(i);
@@ -798,13 +888,60 @@ var HrDashboard = AbstractAction.extend({
                     })
                     .attr("class", function (d, i) {
                         return "arc-" + i; // Assign a unique class to each arc
-                    });
+                    })
+                    .on("click", function (d, i) {
+                        var domain = [];
+                        console.log(d)
+                        domain = [['invoice_partner_display_name', '=', d.data.label],['move_type', '=', 'in_invoice'],['amount_residual_signed', '!=', '0']];
+
+                        var context = {
+                            search_default_domain: domain,
+                        };
+
+                        self.do_action({
+                            name: _t("Bills"),
+                            type: 'ir.actions.act_window',
+                            res_model: 'account.move',
+                            view_mode: 'tree,kanban,form',
+                            views: [[false, 'list'], [false, 'kanban'], [false, 'form']],
+                            context: context,
+                            target: 'new',
+                            domain: domain,
+                            search_view_id: data[1],  // Replace with the ID of your desired search view
+                        });
+//                        console.log(search_view_id)
+
+                        // Rest of the code...
+                    })
+                    .on("mouseover", showTooltip)
+                    .on("mouseout", hideTooltip);
+//                    .on("mouseover", function (d, i) {
+//                        // Get the position of the mouse
+//                        var mouseX = d3.event.pageX;
+//                        var mouseY = d3.event.pageY;
+//
+//                        // Create the content for the tooltip
+//                        var tooltipContent = "Label: " + d.data.label + "<br/>Value: " + d.data.value;
+//                        console.log(tooltipContent);
+//
+//                        // Select the tooltip element and set its content and position
+//                        d3.select("#tooltip")
+//                            .html(tooltipContent)
+//                            .style("left", mouseX + "px")
+//                            .style("top", mouseY + "px")
+//                            .style("opacity", 1);
+//                    })
+//                    .on("mouseout", function (d, i) {
+//                        // Hide the tooltip when the mouse moves out of the arc
+//                        d3.select("#tooltip")
+//                            .style("opacity", 0);
+//                    });
                 arcs.append("text")
                     .attr("transform", function(d) {
                       return "translate(" + arc.centroid(d) + ")"
                     })
                     .attr("text-anchor", "end")
-                    .text(function(d) {return d.value})
+                    .text(function(d) {return d.data.txt})
 
 
                 var legend = d3.select(elem[0]).append("table").attr('class', 'legend');

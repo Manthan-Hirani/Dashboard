@@ -344,8 +344,8 @@
         <div class="employee_dashboard_main">
 <!--            <div class="row main-section mx-5" style="grid-gap: 50px;">-->
             <div class="row main-section">
-                <div class="col-sm-12 col-lg-6 p-0">
-                    <div class="graph_view mx-3">
+                <div class="col-sm-12 col-lg-4 col-md-6 p-0 h-100">
+                    <div class="graph_view mx-2">
                         <div class="text-color hr-chart-1">
                             <div class="oh-card-body pb-0 h-100">
                                 <p class="stat-head">Employee Salary Range</p>
@@ -354,14 +354,24 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-lg-6 p-0">
-                    <div class="graph_view mx-3">
+                <div class="col-sm-12 col-lg-4 col-md-6 p-0 h-100">
+                    <div class="graph_view mx-2">
                         <div class="text-color hr-chart-1">
                             <div class="oh-card-body pb-0 h-100">
                                 <p class="stat-head">Employee Average salary based on Experience</p>
                             </div>
                             <div class="exp_salary_graph"/>
                         </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-lg-4 monthly_join_resign_trend">
+                    <div class="oh-card text-color">
+                        <div class="oh-card-body pb-0">
+                            <h4 class="mb-0">
+                            </h4>
+                            <p class="stat-head" style="padding : 0px;">Monthly Join/Resign Analysis</p>
+                        </div>
+                        <div class="join_resign_trend" />
                     </div>
                 </div>
             </div>

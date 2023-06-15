@@ -86,34 +86,86 @@ class AccountInvoice(models.Model):
 
     @api.model
     def invoices(self):
+
         data = []
         vendor = []
-        for rec in self.env['account.move'].search([('move_type', '=', 'out_invoice'), ('amount_residual_signed', '!=', '0')]):
+        amount = []
+        for rec in self.env['account.move'].search(
+                [('move_type', '=', 'out_invoice'), ('amount_residual_signed', '!=', '0')]):
             vendor.append(rec.partner_id.name)
+            amount.append(abs(int(rec.amount_residual_signed)))
 
-        counter = Counter(vendor)
+        name_sum_dict = {}
 
-        search_id = int(self.env.ref('account.view_account_invoice_filter').sudo().id)
-        data = [{'label': key, 'value': value, 'search_id': search_id} for key, value in counter.items()]
+        for name, amount in zip(vendor, amount):
+            if name not in name_sum_dict:
+                name_sum_dict[name] = {'value': amount, 'text': 1}
+            else:
+                name_sum_dict[name]['value'] += amount
+                name_sum_dict[name]['text'] += 1
 
-        print(data)
+        search_id = self.env.ref('account.view_account_invoice_filter').sudo().id
+        data = [{'label': name, 'value': info['value'], 'txt': info['text'], 'search_id': search_id} for name, info in
+                name_sum_dict.items()]
+
+        # print(data)
 
         return data
+
+        # data = []
+        # vendor = []
+        # amount = []
+        # for rec in self.env['account.move'].search([('move_type', '=', 'out_invoice'), ('amount_residual_signed', '!=', '0')]):
+        #     vendor.append(rec.partner_id.name)
+        #     amount.append(abs(int(rec.amount_residual_signed.name)))
+        #
+        # print(vendor)
+        # print(amount)
+        #
+        # name_sum_dict = {}
+        #
+        # for name, amount in zip(vendor, amount):
+        #     if name not in name_sum_dict:
+        #         name_sum_dict[name] = amount
+        #     else:
+        #         name_sum_dict[name] += amount
+        #
+        # search_id = self.env.ref('account.view_account_invoice_filter').sudo().id
+        # data = [{'label': name, 'value': amount, 'search_id': search_id} for name, amount in name_sum_dict.items()]
+        #
+        # # counter = Counter(vendor)
+        # #
+        # # search_id = int(self.env.ref('account.view_account_invoice_filter').sudo().id)
+        # # data = [{'label': key, 'value': value, 'search_id': search_id} for key, value in counter.items()]
+        #
+        # print(data)
+        #
+        # return data
 
     @api.model
     def bills(self):
         data = []
         vendor = []
+        amount = []
         for rec in self.env['account.move'].search(
                 [('move_type', '=', 'in_invoice'), ('amount_residual_signed', '!=', '0')]):
             vendor.append(rec.partner_id.name)
+            amount.append(abs(int(rec.amount_residual_signed)))
 
-        counter = Counter(vendor)
+        name_sum_dict = {}
+
+        for name, amount in zip(vendor, amount):
+            if name not in name_sum_dict:
+                name_sum_dict[name] = {'value': amount, 'text': 1}
+            else:
+                name_sum_dict[name]['value'] += amount
+                name_sum_dict[name]['text'] += 1
 
         search_id = self.env.ref('account.view_account_invoice_filter').sudo().id
-        data = [{'label': key, 'value': value, 'search_id': search_id} for key, value in counter.items()]
+        data = [{'label': name, 'value': info['value'], 'txt': info['text'], 'search_id': search_id} for name, info in
+                name_sum_dict.items()]
 
-        print(data)
+        # print(data)
 
         return data
 
@@ -357,6 +409,30 @@ class Employee(models.Model):
             data.append({'label': label, 'value': average_salary})
 
         return data
+
+    @api.model
+    def earning_expense_graph(self):
+        data = []
+        earning_component = []  # Total invoices
+        earning_amount = []
+        expense_component = []  # Total employee salary + bills
+        total_expense_amount = []
+        expense_amount_bills = []
+        expense_amount_salary = []
+
+        # Total bills of this year
+        for rec in self.env['account.move'].search([('move_type', '=', 'in_invoice'), ('amount_total_signed', '!=', 0)]):
+            invoice_date = rec.invoice_date
+            if (invoice_date >= date(2022, 1, 1)) and (invoice_date <= date(2022, 12, 31)):
+                expense_amount_bills.append(int(rec.amount_total_signed))
+
+        for rec in self.env['hr.contract'].search([]):
+
+            pass
+
+            # if invoice_date < date(2023, 1, 1):
+            #     # expense_amount_bills.append(int(rec.amount_total_signed))
+            #     print(int(rec.amount_total_signed))
 
     @api.model
     def get_upcoming(self):
@@ -643,6 +719,7 @@ group by hr_employee.department_id,hr_department.name""")
             'values': resign_trend
         }]
 
+        # print(graph_result)
         return graph_result
 
     @api.model

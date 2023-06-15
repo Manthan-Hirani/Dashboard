@@ -534,8 +534,8 @@ h4 .stat-count {
     display: inline-block;
     border-collapse: collapse;
     border-spacing: 0px;
-    margin-left: 90px !important;
-    margin-top: 65px !important;
+    margin-left: 30px !important;
+    margin-top: 20px !important;
 }
 .hr-chart-1{
     margin: 15px 0px;
@@ -1149,20 +1149,7 @@ h4 .stat-count {
     align-items: center;
 }
 
-.tooltip {
-    background: #eee;
-    box-shadow: 0 0 5px #999999;
-    color: #333;
-    display: none;
-    font-size: 12px;
-    left: 130px;
-    padding: 10px;
-    position: absolute;
-    text-align: center;
-    top: 95px;
-    width: 80px;
-    z-index: 10;
-}
+
 
 
 .oh-ribbon {
